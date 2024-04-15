@@ -35,25 +35,18 @@ if __name__ == "__main__":
         if not os.path.isdir(build_dir):
             os.makedirs(build_dir)
         lib.export_library(os.path.join(build_dir, "model_c.tar"))
-        with open(
-            os.path.join(build_dir, "{name}_c.{ext}".format(name="graph", ext="json")), "w"
-        ) as f_graph_json:
+
+        graph_path = os.path.join(build_dir, "{name}_c.{ext}".format(name="graph", ext="json"))
+        with open(graph_path,"w") as f_graph_json:
             f_graph_json.write(graph)
-        with open(
-            os.path.join(build_dir, "{name}_c.{ext}".format(name="params", ext="bin")), "wb"
-        ) as f_params:
+
+        params_path = os.path.join(build_dir, "{name}_c.{ext}".format(name="params", ext="bin"))
+        with open(params_path, "wb") as f_params:
             f_params.write(tvm_runtime.save_param_dict(params))
 
-        # Generate header for output TODO: Possibly add header for input too
-        extra_tar_file = os.path.join(build_dir, "output.tar")
-
-        with tarfile.open(extra_tar_file, "w:gz") as tf:
-            create_header_file(
-                "output_data",
-                np.zeros(
-                    shape=output_shape,
-                    dtype=output_dtype,
-                ),
-                "include/tvm",
-                tf,
-            )
+    # Convert graph and weights to hexdumps
+    graph_path_rel = os.path.relpath("{name}_c.{ext}".format(name="graph", ext="json"))
+    params_path_rel = os.path.relpath("{name}_c.{ext}".format(name="params", ext="bin"))
+    os.chdir(build_dir)
+    os.system("xxd -i {graph} > {graphc} ".format(graph=graph_path_rel, graphc=(graph_path_rel + ".c")))
+    os.system("xxd -i {params} > {paramsc} ".format(params=params_path_rel, paramsc=(params_path_rel + ".c")))
