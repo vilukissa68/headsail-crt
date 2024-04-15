@@ -21,6 +21,7 @@ int main(void)
     char *params_data = (char *)(params_c_bin);
     uint64_t params_size = params_c_bin_len;
 
+    printf("%d\n", params_size);
     // create tvm_runtime
     void *handle = tvm_runtime_create(json_data, params_data, params_size, NULL);
 
@@ -72,22 +73,18 @@ int main(void)
     output.strides = NULL;
     output.byte_offset = 0;
 
-    for (;;)
-    {
-        // set input
-        input1_storage[0] = 5.0;
-        input2_storage[0] = 7.0;
+    // set input
+    input1_storage[0] = 5.0;
+    input2_storage[0] = 7.0;
 
-        // run inference
-        tvm_runtime_run(handle);
+    // run inference
+    tvm_runtime_run(handle);
 
-        // obtain output
-        tvm_runtime_get_output(handle, 0, &output);
+    // obtain output
+    tvm_runtime_get_output(handle, 0, &output);
 
-        printf("std ! %.2f\n", input1_storage[0] + input2_storage[0]);
-        printf("microtvm! %.2f\n", output_storage[0]);
-
-    }
+    printf("std ! %.2f\n", input1_storage[0] + input2_storage[0]);
+    printf("microtvm! %.2f\n", output_storage[0]);
 
     tvm_runtime_destroy(handle);
 
